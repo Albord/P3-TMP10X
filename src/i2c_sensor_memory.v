@@ -7,24 +7,26 @@
 
 */
 
-module I2C_SLAVE_MEMORY #( parameter ADDRESSLENGTH, parameter ADDRESSNUM, parameter NBYTES)(Enable, RorW, DirectionBuffer, InputBuffer, OutputBuffer, AddressFound, AddressList, Data);
-	
+module I2C_SLAVE_MEMORY #( parameter ADDRESSLENGTH, parameter ADDRESSNUM, parameter NBYTES)(Enable, RorW, DirectionBuffer, InputBuffer, OutputBuffer, AddressFound, AddressList, Configurator_Register, Data);
+	//ADDRESSLENGTH ES EL TAMAÑO DE LA DIRECCIÓN DEL ESCLAVO
+	//ADDRESSNUM, EL NÚMERO DE DIRECCIÓNES QUE POSEE EL ESCLAVO, ESTÁ FIJADA A 1
+	//NBYTES ES EL NÚMERO DE BYTES QUE CONTIENE LA MEMORIA DEL ESCLAVO POR DIRECCIÓN
 	input Enable; //Registro para activar la comunicación etre la memoria y la unidad de control
 	input RorW;//En estado 1 estamos indicando que vamos a enviar datos al esclavo, en estado 0 que esperamos recibir
 	input wire [((ADDRESSLENGTH)*ADDRESSNUM) - 1: 0]AddressList;//Variable para guardar la dirección del esclavo
 	output reg AddressFound = 1'b0;//Registro para indicar si la dirección del esclavo coincide con la solicitada
-	input wire [(ADDRESSLENGTH-1): 0] DirectionBuffer;//Buffer para guardar la dirección que solicita el maste
-	input wire [7:0]InputBuffer;//Bufer donde irán todos los datos guardadosa a la memoriA
+	input wire [(ADDRESSLENGTH-1): 0] DirectionBuffer;//Buffer para guardar la dirección que solicita el master
+	input wire [7:0]InputBuffer;//Bufer donde irán todos los datos guardadosa a la memoria
 	output reg [7:0]OutputBuffer;// Buffer donde irán todos los datos recibidos
-	output reg [8*NBYTES*ADDRESSNUM - 1: 0 ] Data = 1'b0;//Memoria del esclavo donde irán todos los datos guardados
+	input wire [15:0] Data;//Memoria del esclavo donde irán todos los datos guardados
 	integer LocalAddressID = 0;//Variable para hacer que un eslavo pueda tener diferentes direcciónes
 	integer ByteCounter = 0;//Contador de bytes que lleva una transferencia, para no exceder el tamaño de la memoria
+	output reg [7:0] Configurator_Register = 8'b00000000;
 	
-
 always @(posedge Enable)//Si se activa el enable, es cuando transferimos los datos del buffer a la memoria
 begin
 	 //Modo transferencia, intercambiamos datos entre el buffer y los datos de la memoria
-	if (RorW) Data[LocalAddressID*8*NBYTES + (ByteCounter)*(8) +:8] <= InputBuffer;//guardamos datos en la memoria
+	if (RorW) Configurator_Register <= InputBuffer;
 	else OutputBuffer <= Data[LocalAddressID*8*NBYTES + (ByteCounter)*(8) +:8];//obtenemos datos de la memoria
 	if (ByteCounter < NBYTES - 1) ByteCounter <= ByteCounter + 1;//SI el contador excede el número de bytes fijado
 	else ByteCounter <= 0;//Por seguridad vuelve a 0

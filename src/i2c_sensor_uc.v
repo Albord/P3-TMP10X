@@ -4,19 +4,21 @@
 
 */
 
-module I2C_SLAVE_UC #( parameter ADDRESSLENGTH)(Sda, Scl, HaveAddress, DirectionBuffer, InputBuffer, OutputBuffer, RorW, MemoryEnable, start, state);
+module I2C_SLAVE_UC #( parameter ADDRESSLENGTH)(Sda, Scl, HaveAddress, DirectionBuffer, InputBuffer, OutputBuffer, RorW);
 	inout Sda;//Pin de datos entre el maestro y los esclavos
-	output wire Scl;//Pin de reloj entre el maestro y el esclavo
+	input wire Scl;//Pin de reloj entre el maestro y el esclavo
 	input HaveAddress;//Input de la memoria para indicar que el dispositivo tiene la dirección de memoria solicitada
 	output reg [(ADDRESSLENGTH-1): 0] DirectionBuffer; //Buffer para guardar la dirección que solicita el master
 	output reg [7:0]InputBuffer; //Bufer donde irán todos los datos guardadosa a la memoria
 	input wire [7:0]OutputBuffer;// Buffer donde irán todos los datos recibidos
 	output reg RorW = 1'b0;//En estado 1 estamos indicando que vamos a enviar datos al esclavo, en estado 0 que esperamos recibir
-	output reg state = 1'b0;//Estado 0 cuando el master está solicitando conexión. Estado 1, cuando hay transferencia
-	output reg MemoryEnable = 1'b0; //Registro para activar la comunicación etre la memoria y la unidad de control
-	output reg start = 1'b0;//Estado para activar el dispositivo slave
+	reg state = 1'b0;//Estado 0 cuando el master está solicitando conexión. Estado 1, cuando hay transferencia
+	reg MemoryEnable = 1'b0; //Registro para activar la comunicación etre la memoria y la unidad de control
+	reg start = 1'b0;//Estado para activar el dispositivo slave
 	integer Counter = 1'b0;//Contador de los bits del Sda, 
 	reg sda_intern = 1'b1;//para que no haya conflictos con el sda tenemos un sda interno
+
+	
 
 assign Sda = ( sda_intern ) ? 1'bz : 1'b0;//Si sda es 0 asignamos el valor, si no, no modifcamos el valor del sda
 
