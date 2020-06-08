@@ -1,4 +1,4 @@
-module I2C_TMP10X(ADD0, ADD1, ALERT, GND, SDA, SCL, V+);
+module I2C_TMP10X(ADD0, ADD1, ALERT, GND, SDA, SCL, V);
 
 parameter ADDRESSLENGTH = 7;
 parameter ADDRESSNUM = 1;
